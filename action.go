@@ -2,21 +2,17 @@ package main
 
 import (
 	"fmt"
-	"io"
-	"log"
+	"net/http"
 	"os"
 	"os/exec"
-	"strings"
 )
 
-func handoff(w io.Writer, path string, requestPath string) {
-	if strings.Index(path, config.WebRoot) != 0 {
-		log.Fatal("directory listing outside webroot requested")
-	}
+func handoff(w http.ResponseWriter, r *http.Request, requestPath string) {
 	env := os.Environ()
-	// env = append(env, fmt.Sprintf("MESSAGE_ID=%s", messageId))
-	//   9 puts obj.handle(ENV['REQUEST_URI'], ENV['DOCUMENT_ROOT'], ENV['HTTP_USER_AGENT'], ENV['REMOTE_ADDR'])
-	fmt.Printf("%#s\n", env)
+	env = append(env, fmt.Sprintf("REQUEST_URI=%s", requestPath))
+	env = append(env, fmt.Sprintf("DOCUMENT_ROOT=%s", config.WebRoot))
+	env = append(env, fmt.Sprintf("HTTP_USER_AGENT=%s", r.UserAgent()))
+	env = append(env, fmt.Sprintf("REMOTE_ADDR=%s", r.RemoteAddr))
 	cmd := exec.Cmd{
 		Args: []string{"xsltd-client.rb"},
 		Env:  env,
@@ -24,6 +20,8 @@ func handoff(w io.Writer, path string, requestPath string) {
 	}
 	output, err := cmd.Output()
 	if err != nil {
-		w.Write(output)
+		panic(err)
 	}
+	fmt.Fprintf(w, "%s", output)
+
 }

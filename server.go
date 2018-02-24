@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strings"
 )
 
 var config = new(Config)
@@ -27,10 +28,25 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.RemoteAddr, requestPath, absPath)
 
 	if fileExists(absPath) {
-		handoff(w, absPath, requestPath)
+		if hasExtension(requestPath, "xml") {
+			handoff(w, r, requestPath)
+		} else {
+			http.ServeFile(w, r, absPath)
+
+		}
 	} else {
 		http.NotFound(w, r)
 	}
+}
+
+func hasExtension(requestPath, extension string) bool {
+	pos := strings.LastIndex(requestPath, extension)
+	if pos > -1 && pos == len(requestPath)-len(extension) {
+		if requestPath[pos-1] == '.' || requestPath[pos-1] == '?' {
+			return true
+		}
+	}
+	return false
 }
 
 func main() {

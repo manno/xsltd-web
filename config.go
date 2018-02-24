@@ -10,7 +10,7 @@ type Config struct {
 
 func (config *Config) Setup() {
 	config.BindPort = fetch("PORT", "8080")
-	config.WebRoot = fetch("WEBROOT", "/home/www/koeln.ccc.de")
+	config.WebRoot = fetch("WEBROOT", "/home/www/koeln.ccc.de/sandbox")
 	config.ClientPath = fetch("XSLTD_CLIENT", "/home/www/koeln.ccc.de/scripts/xsltd-client.rb")
 }
 
