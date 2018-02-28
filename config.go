@@ -3,15 +3,15 @@ package main
 import "os"
 
 type Config struct {
-	BindPort   string
-	WebRoot    string
-	ClientPath string
+	BindPort string
+	WebRoot  string
+	Xalan    string
 }
 
 func (config *Config) Setup() {
 	config.BindPort = fetch("PORT", "8080")
 	config.WebRoot = fetch("WEBROOT", "/home/www/koeln.ccc.de/sandbox")
-	config.ClientPath = fetch("XSLTD_CLIENT", "/home/www/koeln.ccc.de/scripts/xsltd-client.rb")
+	config.Xalan = fetch("XALAN", "xalan")
 }
 
 func fetch(envKey string, defaultValue string) string {

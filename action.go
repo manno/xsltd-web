@@ -2,25 +2,30 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"os/exec"
 )
 
-func handoff(w http.ResponseWriter, r *http.Request, requestPath string) {
+func handoff(w http.ResponseWriter, r *http.Request, xmlFile *XMLFile) {
 	env := os.Environ()
-	env = append(env, fmt.Sprintf("REQUEST_URI=%s", requestPath))
-	env = append(env, fmt.Sprintf("DOCUMENT_ROOT=%s", config.WebRoot))
-	env = append(env, fmt.Sprintf("HTTP_USER_AGENT=%s", r.UserAgent()))
-	env = append(env, fmt.Sprintf("REMOTE_ADDR=%s", r.RemoteAddr))
+	xslPath, err := NewChaosPage(config.WebRoot, xmlFile.FilesystemPath).Stylesheet()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
 	cmd := exec.Cmd{
-		Args: []string{"xsltd-client.rb"},
+		//Args: []string{"xalan", "-q", "-param", "thepath", "'" + xmlFile.URLPath + "'", "-in", xmlFile.FilesystemPath, "-xsl", xslPath},
+		Args: []string{"xalan", "-p", "thepath", "'" + xmlFile.URLPath + "'", xmlFile.FilesystemPath, xslPath},
 		Env:  env,
-		Path: config.ClientPath,
+		Path: config.Xalan,
 	}
 	output, err := cmd.Output()
 	if err != nil {
-		panic(err)
+		log.Printf("error running xalan: %s\n", err)
+		log.Printf("%+v", []string{"xalan", "-p", "thepath", xmlFile.URLPath, xmlFile.FilesystemPath, xslPath})
 	}
 	fmt.Fprintf(w, "%s", output)
 
