@@ -3,13 +3,13 @@ package main
 import "os"
 
 type Config struct {
-	BindPort string
-	WebRoot  string
-	Xalan    string
+	Listen  string
+	WebRoot string
+	Xalan   string
 }
 
 func (config *Config) Setup() {
-	config.BindPort = fetch("PORT", "8080")
+	config.Listen = fetch("LISTEN", "8080")
 	config.WebRoot = fetch("WEBROOT", "/home/www/koeln.ccc.de/sandbox")
 	config.Xalan = fetch("XALAN", "xalan")
 }

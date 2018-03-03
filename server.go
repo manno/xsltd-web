@@ -30,8 +30,7 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	config.Setup()
 
-	var port = ":" + config.BindPort
-	log.Printf("Listening on %s", config.BindPort)
+	log.Printf("Listening on %s", config.Listen)
 	http.HandleFunc("/", viewHandler)
-	log.Fatal(http.ListenAndServe(port, nil))
+	log.Fatal(http.ListenAndServe(config.Listen, nil))
 }
