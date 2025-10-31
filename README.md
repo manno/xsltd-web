@@ -1,21 +1,77 @@
 # XSLTD-CHAOSPAGE
 
+A Go HTTP server that serves XML files transformed via XSLT stylesheets using the Xalan-C processor.
+
 ## Dependencies
 
-* xalan-c
+* **Go 1.16+**
+* **xalan-c** - XSLT processor (install via package manager)
 
-## Running locally
+## Installation
 
+### From Source
+
+```bash
+git clone https://github.com/c4/xsltd-web
+cd xsltd-web
+go build
 ```
-#!/bin/sh
-go get github.com/c4/xsltd-web
-go install github.com/c4/xsltd-web
 
+### Via Go Install
+
+```bash
+go install github.com/c4/xsltd-web@latest
+```
+
+## Running Locally
+
+### Basic Usage
+
+```bash
+# Set environment variables
 export XALAN=/usr/local/bin/Xalan
 export WEBROOT=$HOME/workspace/xsltd-c4/svn/sandbox
-xsltd-web
+export LISTEN=localhost:8080
+
+# Run the server
+./xsltd-web
 ```
 
+### Content Development
+
+**Content changes are reflected immediately** - no server restart needed!
+
+The server reads XML and XSL files from disk on every request (no caching), so:
+- Edit your XML files in WEBROOT
+- Edit your XSL stylesheets
+- Refresh your browser to see changes
+
+This makes content development very fast and iterative.
+
+## Configuration
+
+The server is configured via environment variables:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `LISTEN` | `8080` | Server bind address (e.g., `localhost:8080`) |
+| `WEBROOT` | `/home/www/koeln.ccc.de/sandbox` | Document root directory |
+| `XALAN` | `xalan` | Path to Xalan-C binary |
+
+## Testing
+
+```bash
+# Run all tests
+go test
+
+# Run tests with coverage
+go test -cover
+
+# Run specific test
+go test -run TestFindXML -v
+```
+
+Current test coverage: **84.2%**
 
 ## Run via systemd
 

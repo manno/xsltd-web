@@ -30,7 +30,14 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	config.Setup()
 
+	if err := config.Validate(); err != nil {
+		log.Fatalf("Configuration error: %s", err)
+	}
+
 	log.Printf("Listening on %s", config.Listen)
+	log.Printf("Serving files from: %s", config.WebRoot)
+	log.Printf("Using XSLT processor: %s", config.Xalan)
+
 	http.HandleFunc("/", viewHandler)
 	log.Fatal(http.ListenAndServe(config.Listen, nil))
 }
