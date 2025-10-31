@@ -1,0 +1,112 @@
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+    - go test ./...
+
+builds:
+  - id: xsltd-web
+    binary: xsltd-web
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+
+archives:
+  - id: default
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    formats:
+      - tar.gz
+      - zip
+    format_overrides:
+      - goos: windows
+        formats:
+          - zip
+    files:
+      - README.md
+      - LICENSE*
+
+checksum:
+  name_template: 'checksums.txt'
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^ci:'
+      - '^chore:'
+      - 'README'
+  groups:
+    - title: Features
+      regexp: '^.*?feat(\([[:word:]]+\))??!?:.+$'
+      order: 0
+    - title: 'Bug fixes'
+      regexp: '^.*?fix(\([[:word:]]+\))??!?:.+$'
+      order: 1
+    - title: Others
+      order: 999
+
+dockers:
+  - image_templates:
+      - "ghcr.io/manno/xsltd-web:{{ .Version }}-amd64"
+      - "ghcr.io/manno/xsltd-web:latest-amd64"
+    use: buildx
+    dockerfile: Dockerfile
+    build_flag_templates:
+      - "--platform=linux/amd64"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.source={{.GitURL}}"
+    extra_files:
+      - README.md
+
+  - image_templates:
+      - "ghcr.io/manno/xsltd-web:{{ .Version }}-arm64"
+      - "ghcr.io/manno/xsltd-web:latest-arm64"
+    use: buildx
+    goarch: arm64
+    dockerfile: Dockerfile
+    build_flag_templates:
+      - "--platform=linux/arm64"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.source={{.GitURL}}"
+    extra_files:
+      - README.md
+
+docker_manifests:
+  - name_template: "ghcr.io/manno/xsltd-web:{{ .Version }}"
+    image_templates:
+      - "ghcr.io/manno/xsltd-web:{{ .Version }}-amd64"
+      - "ghcr.io/manno/xsltd-web:{{ .Version }}-arm64"
+
+  - name_template: "ghcr.io/manno/xsltd-web:latest"
+    image_templates:
+      - "ghcr.io/manno/xsltd-web:latest-amd64"
+      - "ghcr.io/manno/xsltd-web:latest-arm64"

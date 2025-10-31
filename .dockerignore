@@ -1,0 +1,31 @@
+# Git
+.git
+.gitignore
+
+# CI/CD
+.github
+
+# Documentation
+*.md
+!README.md
+
+# Go
+*.go
+go.mod
+go.sum
+vendor/
+
+# Tests
+*_test.go
+
+# Build artifacts
+tmp/
+*.tar.gz
+*.zip
+dist/
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo

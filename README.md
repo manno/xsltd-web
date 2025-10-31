@@ -9,10 +9,42 @@ A Go HTTP server that serves XML files transformed via XSLT stylesheets using th
 
 ## Installation
 
+### Pre-built Binaries
+
+Download the latest release for your platform from [GitHub Releases](https://github.com/manno/xsltd-web/releases):
+
+```bash
+# Linux (amd64)
+wget https://github.com/manno/xsltd-web/releases/latest/download/xsltd-web_Linux_x86_64.tar.gz
+tar xzf xsltd-web_Linux_x86_64.tar.gz
+chmod +x xsltd-web
+
+# macOS (arm64)
+wget https://github.com/manno/xsltd-web/releases/latest/download/xsltd-web_Darwin_arm64.tar.gz
+tar xzf xsltd-web_Darwin_arm64.tar.gz
+chmod +x xsltd-web
+```
+
+### Container Image
+
+```bash
+# Pull from GitHub Container Registry
+docker pull ghcr.io/manno/xsltd-web:latest
+
+# Run with volume mount for your content
+docker run -d \
+  -p 8080:8080 \
+  -v /path/to/your/content:/srv/www \
+  -e WEBROOT=/srv/www \
+  ghcr.io/manno/xsltd-web:latest
+```
+
+The container image is based on Debian slim (~80MB) and includes xalan.
+
 ### From Source
 
 ```bash
-git clone https://github.com/c4/xsltd-web
+git clone https://github.com/manno/xsltd-web
 cd xsltd-web
 go build
 ```
@@ -20,7 +52,7 @@ go build
 ### Via Go Install
 
 ```bash
-go install github.com/c4/xsltd-web@latest
+go install github.com/manno/xsltd-web@latest
 ```
 
 ## Running Locally
@@ -64,14 +96,9 @@ The server is configured via environment variables:
 # Run all tests
 go test
 
-# Run tests with coverage
-go test -cover
-
 # Run specific test
 go test -run TestFindXML -v
 ```
-
-Current test coverage: **84.2%**
 
 ## Run via systemd
 
@@ -94,3 +121,41 @@ SyslogIdentifier=xsltd-chaospage
 [Install]
 WantedBy=default.target
 ```
+
+## Releases
+
+Releases are automated via GitHub Actions and [GoReleaser](https://goreleaser.com/):
+
+1. Tag a new version: `git tag -a v1.0.0 -m "Release v1.0.0"`
+2. Push the tag: `git push origin v1.0.0`
+3. GitHub Actions will automatically:
+   - Run tests
+   - Build binaries for Linux, macOS, Windows (amd64 & arm64)
+   - Create container images for linux/amd64 and linux/arm64
+   - Push images to `ghcr.io/manno/xsltd-web`
+   - Create a GitHub release with binaries and changelog
+
+### Testing Releases Locally
+
+Install GoReleaser and test the release process locally:
+
+```bash
+# Install GoReleaser
+brew install goreleaser/tap/goreleaser
+# or
+go install github.com/goreleaser/goreleaser/v2@latest
+
+# Validate configuration
+goreleaser check
+
+# Build binaries only (fast, no Docker)
+goreleaser build --snapshot --clean
+
+# Full release dry-run with Docker images
+goreleaser release --snapshot --clean --skip=publish
+
+# Full dry-run without Docker (faster)
+goreleaser release --snapshot --clean --skip=publish --skip=docker
+```
+
+Artifacts will be in the `./dist/` directory.
